@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react';
 
-import { useRouteNode } from '../Route';
+import { getValidInitialRouteName, useRouteNode } from '../Route';
 import { router } from '../imperative-api';
-import { normalizeRouteName, useGuardRedirect } from '../layouts/GuardContext';
+import { useGuardRedirect } from '../layouts/GuardContext';
 import {
   type Descriptor,
   type ParamListBase,
@@ -65,8 +65,9 @@ export function useVisibleTabsWithRedirect<
     if (guardRedirect !== undefined) {
       return guardRedirect;
     }
+    const initialRouteName = getValidInitialRouteName(routeNode);
     const redirectRoute =
-      findRouteByName(visibleRoutes, routeNode?.initialRouteName) ?? visibleRoutes[0];
+      visibleRoutes.find((route) => route.name === initialRouteName) ?? visibleRoutes[0];
     if (redirectRoute) {
       return buildHref(redirectRoute);
     }
@@ -107,8 +108,4 @@ function isDeclaredInLayout<Options extends object>(
   descriptor: TabDescriptor<Options> | undefined
 ): boolean {
   return descriptor?.routeSource === 'layout';
-}
-
-function findRouteByName<Route extends TabRoute>(routes: Route[], name: string | undefined) {
-  return routes.find((route) => route.name === name || normalizeRouteName(route.name) === name);
 }

@@ -3,7 +3,13 @@
 import React, { use, useEffect } from 'react';
 
 import type { LoadedRoute, RouteNode } from './Route';
-import { SuspenseFallbackContext, Route, sortRoutesWithInitial, useRouteNode } from './Route';
+import {
+  findRouteNodeByName,
+  SuspenseFallbackContext,
+  Route,
+  sortRoutesWithInitial,
+  useRouteNode,
+} from './Route';
 import { useExpoRouterStore } from './global-state/storeContext';
 import { useColorSchemeChangesIfNeeded } from './global-state/utils';
 // Direct import to prevent a require cycle
@@ -102,10 +108,8 @@ function getSortedChildren<
         console.warn(`[Layout children]: Too many screens defined. Route "${name}" is extraneous.`);
         return null;
       }
-      const matchIndex = entries.findIndex(
-        (child) => child.route === name || child.route === `${name}/index`
-      );
-      if (matchIndex === -1) {
+      const match = findRouteNodeByName(entries, name);
+      if (!match) {
         console.warn(
           `[Layout children]: No route named "${name}" exists in nested children:`,
           children.map(({ route }) => route)
@@ -113,8 +117,7 @@ function getSortedChildren<
         return null;
       } else {
         // Get match and remove from entries
-        const match = entries[matchIndex];
-        entries.splice(matchIndex, 1);
+        entries.splice(entries.indexOf(match), 1);
 
         if (getId) {
           console.warn(

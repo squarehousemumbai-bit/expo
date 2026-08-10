@@ -600,27 +600,30 @@ describe('anchor', () => {
     });
   });
 
-  it(`throws if anchor does not match a route`, () => {
-    expect(() => {
+  it(`warns if anchor does not match a route`, () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(
       getRoutes(
         inMemoryContext({
           _layout: {
-            unstable_settings: {
-              anchor: 'c',
-            },
+            unstable_settings: { anchor: 'c' },
             default: () => null,
           },
           a: () => null,
           b: () => null,
-        })
-      );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Layout ./_layout.js has invalid anchor 'c'. Valid options are: 'a', 'b'"`
+        }),
+        { skipGenerated: true }
+      )?.initialRouteName
+    ).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'The initial route name "c" was not found in the layout at "./_layout.js". Available routes are: "a", "b".'
     );
+    warnSpy.mockRestore();
   });
 
-  it(`throws if anchor with group selection does not match a route`, () => {
-    expect(() => {
+  it(`warns if anchor with group selection does not match a route`, () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(
       getRoutes(
         inMemoryContext({
           '(a,b)/_layout': {
@@ -635,11 +638,31 @@ describe('anchor', () => {
             default: () => null,
           },
           '(a,b)/c': () => null,
-        })
-      );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Layout ./(a,b)/_layout.js has invalid anchor 'd' for group '(b)'. Valid options are: 'c'"`
+        }),
+        { skipGenerated: true }
+      )
+    ).toBeDefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'The initial route name "d" was not found in the layout at "./(a,b)/_layout.js". Available routes are: "c".'
     );
+    warnSpy.mockRestore();
+  });
+
+  it(`resolves a directory anchor to its index route entry point`, () => {
+    const routes = getRoutes(
+      inMemoryContext({
+        _layout: {
+          unstable_settings: { anchor: 'a' },
+          default: () => null,
+        },
+        'a/index': () => null,
+        b: () => null,
+      }),
+      { skipGenerated: true }
+    );
+
+    expect(routes?.initialRouteName).toBe('a/index');
+    expect(routes?.children[0]?.entryPoints).toContain('./a/index.js');
   });
 });
 

@@ -36,6 +36,14 @@ const descriptors = {
 };
 const routeNames = routes.map((route) => route.name);
 
+function routeNode(initialRouteName: string) {
+  // Only route names are relevant to this hook test fixture.
+  return {
+    initialRouteName,
+    children: routes.map(({ name }) => ({ route: name })),
+  } as ReturnType<typeof useRouteNode>;
+}
+
 let replaceSpy: jest.SpyInstance;
 let warnSpy: jest.SpyInstance;
 let buildHref: jest.Mock;
@@ -84,9 +92,7 @@ describe('useVisibleTabsWithRedirect', () => {
   });
 
   it('redirects an unavailable focused route to the configured visible route', () => {
-    mockedUseRouteNode.mockReturnValue({ initialRouteName: 'settings' } as ReturnType<
-      typeof useRouteNode
-    >);
+    mockedUseRouteNode.mockReturnValue(routeNode('settings'));
     renderHook(() =>
       useVisibleTabsWithRedirect({
         routes,
@@ -101,9 +107,7 @@ describe('useVisibleTabsWithRedirect', () => {
   });
 
   it('builds the redirect href from the selected route', () => {
-    mockedUseRouteNode.mockReturnValue({ initialRouteName: 'settings' } as ReturnType<
-      typeof useRouteNode
-    >);
+    mockedUseRouteNode.mockReturnValue(routeNode('settings'));
     renderHook(() =>
       useVisibleTabsWithRedirect({
         routes,
@@ -117,9 +121,7 @@ describe('useVisibleTabsWithRedirect', () => {
   });
 
   it('falls back to the first visible route when the configured route is unavailable', () => {
-    mockedUseRouteNode.mockReturnValue({ initialRouteName: 'missing' } as ReturnType<
-      typeof useRouteNode
-    >);
+    mockedUseRouteNode.mockReturnValue(routeNode('missing'));
     renderHook(() =>
       useVisibleTabsWithRedirect({
         routes,

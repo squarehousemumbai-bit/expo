@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useContextKey, useRouteNode } from '../Route';
+import { getValidInitialRouteName, useContextKey, useRouteNode } from '../Route';
 import { GuardContextProvider } from '../layouts/GuardContext';
 import { StackRouter } from '../layouts/StackClient';
 import { useFilterScreenChildren } from '../layouts/withLayoutContext';
@@ -28,7 +28,6 @@ type UseNavigationBuilderRouter = Parameters<typeof useNavigationBuilder>[0];
 type UseNavigationBuilderOptions = Parameters<typeof useNavigationBuilder>[1];
 
 export type NavigatorProps<T extends UseNavigationBuilderRouter> = {
-  initialRouteName?: UseNavigationBuilderOptions['initialRouteName'];
   screenOptions?: UseNavigationBuilderOptions['screenOptions'];
   children?: UseNavigationBuilderOptions['children'];
   router?: T;
@@ -41,7 +40,6 @@ export type NavigatorProps<T extends UseNavigationBuilderRouter> = {
  * @hidden
  */
 export function Navigator<T extends UseNavigationBuilderRouter = typeof StackRouter>({
-  initialRouteName,
   screenOptions,
   children,
   router,
@@ -70,7 +68,7 @@ export function Navigator<T extends UseNavigationBuilderRouter = typeof StackRou
     id: contextKey,
     children: sortedScreens || [<Screen key="default" />],
     screenOptions,
-    initialRouteName,
+    initialRouteName: getValidInitialRouteName(node),
   });
 
   // useNavigationBuilder requires at least one screen to be defined otherwise it will throw.
@@ -117,6 +115,7 @@ function SlotNavigator(props: NavigatorProps<any>) {
     ...props,
     id: contextKey,
     children: useSortedScreens(screens ?? [], guardedRedirects),
+    initialRouteName: getValidInitialRouteName(node),
   });
   const focusedRouteKey = state.routes[state.index]?.key;
 

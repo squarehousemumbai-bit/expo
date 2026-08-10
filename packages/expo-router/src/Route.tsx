@@ -81,6 +81,40 @@ export function useRouteNode(): RouteNode | null {
   return use(CurrentRouteContext);
 }
 
+export function findRouteNodeByName(
+  children: RouteNode[] | undefined,
+  routeName: string | undefined
+): RouteNode | undefined {
+  if (!routeName) {
+    return undefined;
+  }
+  return children?.find(
+    (child) => child.route === routeName || child.route === `${routeName}/index`
+  );
+}
+
+export function getValidInitialRoute(
+  node: RouteNode | null,
+  initialRouteName = node?.initialRouteName
+): RouteNode | undefined {
+  if (!node || !initialRouteName) {
+    return undefined;
+  }
+  const route = findRouteNodeByName(node.children, initialRouteName);
+  if (!route && process.env.NODE_ENV !== 'production') {
+    console.warn(
+      `The initial route name "${initialRouteName}" was not found in the layout at "${node.contextKey}". ` +
+        `Available routes are: ${node.children.map(({ route }) => `"${route}"`).join(', ')}.`
+    );
+  }
+  return route;
+}
+
+export const getValidInitialRouteName = (
+  node: RouteNode | null,
+  initialRouteName = node?.initialRouteName
+) => getValidInitialRoute(node, initialRouteName)?.route;
+
 export function useContextKey(): string {
   const node = useRouteNode();
   if (node == null) {

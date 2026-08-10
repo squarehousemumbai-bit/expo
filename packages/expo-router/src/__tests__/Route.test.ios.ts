@@ -1,5 +1,5 @@
 import type { RouteNode } from '../Route';
-import { sortRoutes } from '../Route';
+import { findRouteNodeByName, getValidInitialRouteName, sortRoutes } from '../Route';
 import { generateDynamic } from '../getRoutes';
 
 const asRouteNode = (route: string): RouteNode => {
@@ -86,5 +86,76 @@ describe(sortRoutes, () => {
     expect(sortRoutes(asRouteNode('[...a]'), asRouteNode('index'))).toBe(1);
     expect(sortRoutes(asRouteNode('[...a]'), asRouteNode('a'))).toBe(1);
     expect(sortRoutes(asRouteNode('[...a]'), asRouteNode('(a)'))).toBe(1);
+  });
+});
+
+describe(getValidInitialRouteName, () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('returns the registered route name for a valid setting', () => {
+    const node = asRouteNode('_layout');
+    node.initialRouteName = 'a';
+    node.children = [asRouteNode('a')];
+
+    expect(getValidInitialRouteName(node)).toBe('a');
+  });
+
+  it('resolves a directory setting to its registered index route', () => {
+    const node = asRouteNode('_layout');
+    node.initialRouteName = 'a';
+    node.children = [asRouteNode('a/index')];
+
+    expect(getValidInitialRouteName(node)).toBe('a/index');
+  });
+
+  it('returns undefined for a missing route', () => {
+    const node = asRouteNode('_layout');
+    node.initialRouteName = 'missing';
+    node.contextKey = './app/(tabs)/_layout.tsx';
+    node.children = [asRouteNode('index'), asRouteNode('settings/index')];
+
+    expect(getValidInitialRouteName(node)).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'The initial route name "missing" was not found in the layout at "./app/(tabs)/_layout.tsx". Available routes are: "index", "settings/index".'
+    );
+  });
+
+  it('returns undefined without a route node', () => {
+    expect(getValidInitialRouteName(null)).toBeUndefined();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not warn in production', () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const node = asRouteNode('_layout');
+    node.initialRouteName = 'missing';
+
+    expect(getValidInitialRouteName(node)).toBeUndefined();
+    expect(warnSpy).not.toHaveBeenCalled();
+    process.env.NODE_ENV = originalEnv;
+  });
+});
+
+describe(findRouteNodeByName, () => {
+  it.each([
+    ['settings', 'settings'],
+    ['settings/index', 'settings'],
+  ])('matches the registered route %s by the name %s', (route, name) => {
+    expect(findRouteNodeByName([asRouteNode('index'), asRouteNode(route)], name)?.route).toBe(
+      route
+    );
+  });
+
+  it('does not match a nested route with the same prefix', () => {
+    expect(findRouteNodeByName([asRouteNode('settings/profile')], 'settings')).toBeUndefined();
   });
 });

@@ -1,4 +1,9 @@
-import type { DynamicConvention, MiddlewareNode, RouteNode } from './Route';
+import {
+  getValidInitialRoute,
+  type DynamicConvention,
+  type MiddlewareNode,
+  type RouteNode,
+} from './Route';
 import {
   matchArrayGroupName,
   matchDynamicName,
@@ -961,27 +966,12 @@ function crawlAndAppendInitialRoutesAndEntryFiles(
     }
 
     if (anchor) {
-      const anchorRoute = node.children.find((child) => child.route === anchor);
-      if (!anchorRoute) {
-        const validAnchorRoutes = node.children
-          .filter((child) => !child.generated)
-          .map((child) => `'${child.route}'`)
-          .join(', ');
-
-        if (groupName) {
-          throw new Error(
-            `Layout ${node.contextKey} has invalid anchor '${anchor}' for group '(${groupName})'. Valid options are: ${validAnchorRoutes}`
-          );
-        } else {
-          throw new Error(
-            `Layout ${node.contextKey} has invalid anchor '${anchor}'. Valid options are: ${validAnchorRoutes}`
-          );
-        }
-      }
-
       // Navigators can add initialRoutes into the history, so they need to be included in the entryPoints
-      node.initialRouteName = anchor;
-      entryPoints.push(anchorRoute.contextKey);
+      const anchorRoute = getValidInitialRoute(node, anchor);
+      node.initialRouteName = anchorRoute?.route;
+      if (anchorRoute) {
+        entryPoints.push(anchorRoute.contextKey);
+      }
     }
 
     for (const child of node.children) {

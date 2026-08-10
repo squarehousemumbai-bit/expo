@@ -862,7 +862,8 @@ it.each(['second', 'second/index'])('redirects to initial route %s', (initialRou
       _layout: {
         unstable_settings: { initialRouteName },
         default: () => (
-          <Tabs>
+          // The cast simulates a stale prop supplied by untyped JavaScript.
+          <Tabs options={{ initialRouteName: 'index' } as never}>
             <TabList>
               <TabTrigger name="index" href="/" />
               <TabTrigger name="second" href="/second" />
@@ -906,6 +907,35 @@ it('falls back to the first trigger when the initial route has no trigger', () =
 
   expect(screen).toHavePathname('/');
   expect(screen.getByTestId('index')).toBeVisible();
+});
+
+it('warns and falls back when the configured initial route does not exist', () => {
+  const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+  expect(() =>
+    renderRouter({
+      _layout: {
+        unstable_settings: { initialRouteName: 'missing' },
+        default: () => (
+          <Tabs>
+            <TabList>
+              <TabTrigger name="index" href="/" />
+              <TabTrigger name="second" href="/second" />
+            </TabList>
+            <TabSlot />
+          </Tabs>
+        ),
+      },
+      index: () => <Text testID="index">Index</Text>,
+      second: () => <Text testID="second">Second</Text>,
+    })
+  ).not.toThrow();
+
+  expect(screen.getByTestId('index')).toBeVisible();
+  expect(warnSpy).toHaveBeenCalledWith(
+    'The initial route name "missing" was not found in the layout at "./_layout.js". Available routes are: "index", "second".'
+  );
+  warnSpy.mockRestore();
 });
 
 describe('warnings/errors', () => {
