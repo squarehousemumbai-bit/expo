@@ -1,6 +1,8 @@
 import { requireNativeView } from 'expo';
+import type { Ref } from 'react';
 import { I18nManager, type ColorValue, type StyleProp, type ViewStyle } from 'react-native';
 
+import { TextInputHostProvider, useTextInputHost } from '../../keyboard';
 import { createViewModifierEventListener } from '../modifiers/utils';
 import { type CommonViewModifierProps } from '../types';
 
@@ -57,7 +59,11 @@ export interface HostProps extends CommonViewModifierProps {
 }
 
 const HostNativeView: React.ComponentType<
-  HostProps & { matchContentsVertical?: boolean; matchContentsHorizontal?: boolean }
+  HostProps & {
+    matchContentsVertical?: boolean;
+    matchContentsHorizontal?: boolean;
+    ref?: Ref<any>;
+  }
 > = requireNativeView('ExpoUI', 'HostView');
 
 /**
@@ -73,24 +79,28 @@ export function Host(props: HostProps) {
     seedColor,
     ...restProps
   } = props;
+  const { hostRef, registry } = useTextInputHost();
 
   return (
-    <HostNativeView
-      modifiers={modifiers}
-      {...(modifiers ? createViewModifierEventListener(modifiers) : undefined)}
-      matchContentsVertical={
-        typeof matchContents === 'object' ? matchContents.vertical : matchContents
-      }
-      matchContentsHorizontal={
-        typeof matchContents === 'object' ? matchContents.horizontal : matchContents
-      }
-      onLayoutContent={onLayoutContent}
-      layoutDirection={
-        layoutDirection ?? (I18nManager.getConstants().isRTL ? 'rightToLeft' : 'leftToRight')
-      }
-      ignoreSafeArea={ignoreSafeArea}
-      seedColor={seedColor}
-      {...restProps}
-    />
+    <TextInputHostProvider registry={registry}>
+      <HostNativeView
+        modifiers={modifiers}
+        {...(modifiers ? createViewModifierEventListener(modifiers) : undefined)}
+        matchContentsVertical={
+          typeof matchContents === 'object' ? matchContents.vertical : matchContents
+        }
+        matchContentsHorizontal={
+          typeof matchContents === 'object' ? matchContents.horizontal : matchContents
+        }
+        onLayoutContent={onLayoutContent}
+        layoutDirection={
+          layoutDirection ?? (I18nManager.getConstants().isRTL ? 'rightToLeft' : 'leftToRight')
+        }
+        ignoreSafeArea={ignoreSafeArea}
+        seedColor={seedColor}
+        {...restProps}
+        ref={hostRef}
+      />
+    </TextInputHostProvider>
   );
 }

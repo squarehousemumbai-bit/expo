@@ -1,5 +1,5 @@
 import { requireNativeView } from 'expo';
-import { useMemo } from 'react';
+import { useMemo, type Ref } from 'react';
 import {
   type ColorSchemeName,
   type ColorValue,
@@ -9,6 +9,7 @@ import {
   useColorScheme as useRNColorScheme,
 } from 'react-native';
 
+import { TextInputHostProvider, useTextInputHost } from '../../keyboard';
 import { getMaterialColors, HostPaletteContext } from '../colors';
 import { type PrimitiveBaseProps } from '../layout';
 
@@ -72,6 +73,7 @@ type NativeHostProps = Omit<HostProps, 'colorScheme'> & {
   matchContentsHorizontal?: boolean;
   colorScheme?: ColorSchemeName;
   seedColor?: ColorValue;
+  ref?: Ref<any>;
 };
 
 const HostNativeView: React.ComponentType<NativeHostProps> = requireNativeView(
@@ -97,25 +99,29 @@ export function Host(props: HostProps) {
     () => getMaterialColors({ scheme: resolvedScheme, seedColor }),
     [resolvedScheme, seedColor]
   );
+  const { hostRef, registry } = useTextInputHost();
 
   return (
     <HostPaletteContext.Provider value={palette}>
-      <HostNativeView
-        {...restProps}
-        modifiers={modifiers}
-        matchContentsVertical={
-          typeof matchContents === 'object' ? matchContents.vertical : matchContents
-        }
-        matchContentsHorizontal={
-          typeof matchContents === 'object' ? matchContents.horizontal : matchContents
-        }
-        colorScheme={schemeString}
-        seedColor={seedColor}
-        onLayoutContent={onLayoutContent}
-        layoutDirection={
-          layoutDirection ?? (I18nManager.getConstants().isRTL ? 'rightToLeft' : 'leftToRight')
-        }
-      />
+      <TextInputHostProvider registry={registry}>
+        <HostNativeView
+          {...restProps}
+          modifiers={modifiers}
+          matchContentsVertical={
+            typeof matchContents === 'object' ? matchContents.vertical : matchContents
+          }
+          matchContentsHorizontal={
+            typeof matchContents === 'object' ? matchContents.horizontal : matchContents
+          }
+          colorScheme={schemeString}
+          seedColor={seedColor}
+          onLayoutContent={onLayoutContent}
+          layoutDirection={
+            layoutDirection ?? (I18nManager.getConstants().isRTL ? 'rightToLeft' : 'leftToRight')
+          }
+          ref={hostRef}
+        />
+      </TextInputHostProvider>
     </HostPaletteContext.Provider>
   );
 }
