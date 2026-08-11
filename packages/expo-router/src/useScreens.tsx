@@ -61,7 +61,6 @@ export type ScreenProps<
 > = {
   /** Name is required when used inside a Layout component. */
   name?: string;
-  initialParams?: Record<string, any>;
   options?:
     | TOptions
     | ((prop: { route: DescriptorRouteProp<ParamListBase, string>; navigation: any }) => TOptions);
@@ -103,7 +102,7 @@ function getSortedChildren<
   const entries = [...children];
 
   const ordered = order
-    .map(({ name, initialParams, listeners, options, getId, dangerouslySingular: singular }) => {
+    .map(({ name, listeners, options, getId, dangerouslySingular: singular }) => {
       if (!entries.length) {
         console.warn(`[Layout children]: Too many screens defined. Route "${name}" is extraneous.`);
         return null;
@@ -139,7 +138,7 @@ function getSortedChildren<
 
         return {
           route: match,
-          props: { initialParams, listeners, options, getId },
+          props: { listeners, options, getId },
           routeSource: 'layout' as const,
         };
       }
