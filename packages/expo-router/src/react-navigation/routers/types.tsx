@@ -37,7 +37,7 @@ export type NavigationState<ParamList extends ParamListBase = ParamListBase> = R
    * During rehydration, the state will be discarded if type doesn't match with router type.
    * It can also be used to detect the type of the navigator we're dealing with.
    */
-  type: string;
+  type?: string;
   /**
    * Whether the navigation state has been rehydrated.
    */
@@ -149,13 +149,20 @@ export type RouterConfigOptions = {
  */
 export type RouterActionOptions = Omit<RouterConfigOptions, 'routeParamList'>;
 
-export type Router<State extends NavigationState, Action extends NavigationAction> = {
-  /**
-   * Type of the router. Should match the `type` property in state.
-   * If the type doesn't match, the state will be discarded during rehydration.
-   */
-  type: State['type'];
+/**
+ * Type of the router. Should match the `type` property in state.
+ * If the type doesn't match, the state will be discarded during rehydration.
+ * Only routers whose state has no `type` may omit it, since a state without a `type`
+ * is accepted by every router.
+ */
+type RouterType<State extends NavigationState> = undefined extends State['type']
+  ? { type?: State['type'] }
+  : { type: State['type'] };
 
+export type Router<
+  State extends NavigationState,
+  Action extends NavigationAction,
+> = RouterType<State> & {
   /**
    * Initialize the navigation state.
    *
