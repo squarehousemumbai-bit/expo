@@ -31,6 +31,14 @@ const MockedScreenStackItem = ScreenStackItem as jest.MockedFunction<typeof Scre
  * This file is for testing Stack specific functionality
  */
 describe('canDismiss', () => {
+  it('works with fresh stack state', () => {
+    renderRouter({ index: () => null, b: () => null });
+
+    expect(router.canDismiss()).toBe(false);
+    act(() => router.push('/b'));
+    expect(router.canDismiss()).toBe(true);
+  });
+
   it('should work within the default Stack', () => {
     renderRouter(
       {
@@ -256,12 +264,10 @@ test('dismissAll nested', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
           ],
@@ -363,12 +369,10 @@ test('dismissAll nested', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
           ],
@@ -439,7 +443,6 @@ test('dismissAll nested', () => {
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
           ],

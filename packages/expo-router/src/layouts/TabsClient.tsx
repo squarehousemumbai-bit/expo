@@ -55,7 +55,7 @@ const Tabs = unstable_integrateWithRouter<
     preload: (name) => dispatch({ type: 'PRELOAD', payload: { name } }),
     popNestedStackToTop: (routeKey) => {
       const nestedState = state.routes.find((route) => route.key === routeKey)?.state;
-      if (nestedState?.type === 'stack' && nestedState.key) {
+      if (nestedState?.key) {
         dispatch({ ...StackActions.popToTop(), target: nestedState.key });
       }
     },

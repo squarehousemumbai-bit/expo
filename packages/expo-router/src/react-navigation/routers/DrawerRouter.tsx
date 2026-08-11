@@ -30,7 +30,7 @@ export type DrawerNavigationState<ParamList extends ParamListBase> = Omit<
   /**
    * Type of the router, in this case, it's drawer.
    */
-  type: 'drawer';
+  type?: 'drawer';
   /**
    * List of previously visited route keys and drawer open status.
    */
@@ -142,21 +142,6 @@ export function DrawerRouter({
     ...router,
 
     type: 'drawer',
-
-    getInitialState({ routeNames, routeParamList, routeGetIdList }) {
-      const state = router.getInitialState({
-        routeNames,
-        routeParamList,
-        routeGetIdList,
-      });
-
-      return {
-        ...state,
-        stale: false,
-        type: 'drawer',
-        key: `drawer-${nanoid()}`,
-      };
-    },
 
     getRehydratedState(partialState, { routeNames, routeParamList, routeGetIdList }) {
       if (partialState.stale === false) {

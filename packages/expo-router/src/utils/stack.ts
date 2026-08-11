@@ -15,6 +15,7 @@ export function getHistoryLength(state: ReactNavigationState): number {
     return state.index + 1;
   }
 
+  // Without a type, both stack and tabs can use the route count as the history length.
   return state.routes.length;
 }
 
@@ -22,6 +23,7 @@ export function isRoutePreloadedInStack(
   navigationState: NavigationState | undefined,
   route: { key: string }
 ): boolean {
+  // When preloading, the stack type will be added to the navigation state.
   if (!navigationState || navigationState.type !== 'stack') {
     return false;
   }

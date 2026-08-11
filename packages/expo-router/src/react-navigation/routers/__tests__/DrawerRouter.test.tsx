@@ -10,31 +10,9 @@ import {
   type RouterActionOptions,
   type RouterConfigOptions,
 } from '..';
+import { createInitialState } from '../../core/createInitialState';
 
 jest.mock('nanoid/non-secure', () => ({ nanoid: () => 'test' }));
-
-test('gets initial state from route names and params with initialRouteName', () => {
-  const router = DrawerRouter({ initialRouteName: 'baz' });
-
-  expect(
-    router.getInitialState({
-      routeNames: ['bar', 'baz', 'qux'],
-      routeParamList: {
-        baz: { answer: 42 },
-        qux: { name: 'Jane' },
-      },
-      routeGetIdList: {},
-    })
-  ).toEqual({
-    index: 0,
-    key: 'drawer-test',
-    routeNames: ['bar', 'baz', 'qux'],
-    routes: [{ key: 'baz-test', name: 'baz', params: { answer: 42 } }],
-    history: [{ type: 'route', key: 'baz-test' }],
-    stale: false,
-    type: 'drawer',
-  });
-});
 
 test.each<[DrawerActionType, { type: string; key?: string; status?: string }[]]>([
   [
@@ -105,29 +83,6 @@ test('preserves reconstructed history after closing the drawer', () => {
   expect(result?.routes[result.index ?? -1]?.name).toBe('bar');
 });
 
-test('gets initial state from route names and params without initialRouteName', () => {
-  const router = DrawerRouter({});
-
-  expect(
-    router.getInitialState({
-      routeNames: ['bar', 'baz', 'qux'],
-      routeParamList: {
-        baz: { answer: 42 },
-        qux: { name: 'Jane' },
-      },
-      routeGetIdList: {},
-    })
-  ).toEqual({
-    index: 0,
-    key: 'drawer-test',
-    routeNames: ['bar', 'baz', 'qux'],
-    routes: [{ key: 'bar-test', name: 'bar' }],
-    history: [{ type: 'route', key: 'bar-test' }],
-    stale: false,
-    type: 'drawer',
-  });
-});
-
 test('preserves drawer status when route names change', () => {
   const router = DrawerRouter({});
   const options: RouterConfigOptions = {
@@ -135,7 +90,7 @@ test('preserves drawer status when route names change', () => {
     routeParamList: {},
     routeGetIdList: {},
   };
-  const initialState = router.getInitialState(options) as DrawerNavigationState<ParamListBase>;
+  const initialState = createInitialState<DrawerNavigationState<ParamListBase>>(options);
   const openState = router.getStateForAction(
     initialState,
     DrawerActions.openDrawer(),
@@ -158,7 +113,7 @@ test('restores route history without dropping drawer status when the active rout
     routeParamList: {},
     routeGetIdList: {},
   };
-  const initialState = router.getInitialState(options) as DrawerNavigationState<ParamListBase>;
+  const initialState = createInitialState<DrawerNavigationState<ParamListBase>>(options);
   const openState = router.getStateForAction(
     initialState,
     DrawerActions.openDrawer(),

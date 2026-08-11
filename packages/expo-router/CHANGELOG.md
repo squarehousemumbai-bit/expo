@@ -4,6 +4,7 @@
 
 ### 🛠 Breaking changes
 
+- Remove `getInitialState` from the `Router` interface
 - Remove the deprecated `NavigationContainer` export
 - Make navigation state `type` optional for custom routers. ([#48757](https://github.com/expo/expo/pull/48757) by [@Ubax](https://github.com/Ubax))
 - Handle `PUSH` in tab and drawer routers instead of coercing it to `NAVIGATE`. Custom routers must now handle the `PUSH` action in `getStateForAction`. ([#48752](https://github.com/expo/expo/pull/48752) by [@Ubax](https://github.com/Ubax))

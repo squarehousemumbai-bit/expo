@@ -62,7 +62,7 @@ export type TabNavigationState<ParamList extends ParamListBase> = Omit<
   /**
    * Type of the router, in this case, it's tab.
    */
-  type: 'tab';
+  type?: 'tab';
   /**
    * List of previously visited route keys.
    */
@@ -298,22 +298,6 @@ export function TabRouter({
     ...BaseRouter,
 
     type: 'tab',
-
-    getInitialState({ routeNames, routeParamList }) {
-      const routes = addFallbackRouteIfEmpty([], routeNames, routeParamList, initialRouteName);
-      const index = routes.length === 0 ? -1 : 0;
-      const history = getRouteHistory(routes, index, backBehavior, initialRouteName);
-
-      return {
-        stale: false,
-        type: 'tab',
-        key: `tab-${nanoid()}`,
-        index,
-        routeNames,
-        history,
-        routes,
-      };
-    },
 
     getRehydratedState(partialState, { routeNames, routeParamList }) {
       const state = partialState;

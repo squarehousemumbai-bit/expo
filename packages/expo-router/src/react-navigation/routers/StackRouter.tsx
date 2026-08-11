@@ -57,7 +57,7 @@ export type StackNavigationState<ParamList extends ParamListBase> = NavigationSt
   /**
    * Type of the router, in this case, it's stack.
    */
-  type: 'stack';
+  type?: 'stack';
 };
 
 export function getStackRoutes<ParamList extends ParamListBase>(
@@ -191,28 +191,6 @@ export function StackRouter(options: StackRouterOptions) {
     ...BaseRouter,
 
     type: 'stack',
-
-    getInitialState({ routeNames, routeParamList }) {
-      const initialRouteName =
-        options.initialRouteName !== undefined && routeNames.includes(options.initialRouteName)
-          ? options.initialRouteName
-          : routeNames[0]!;
-
-      return {
-        stale: false,
-        type: 'stack',
-        key: `stack-${nanoid()}`,
-        index: 0,
-        routeNames,
-        routes: [
-          {
-            key: `${initialRouteName}-${nanoid()}`,
-            name: initialRouteName,
-            params: routeParamList[initialRouteName],
-          },
-        ],
-      };
-    },
 
     getRehydratedState(partialState, { routeNames, routeParamList }) {
       const state = partialState;
@@ -709,6 +687,7 @@ export function StackRouter(options: StackRouterOptions) {
           if (route) {
             return {
               ...state,
+              type: 'stack',
               routes: state.routes.map((r) => {
                 if (r.key !== route?.key) {
                   return r;
@@ -720,15 +699,18 @@ export function StackRouter(options: StackRouterOptions) {
               }),
             };
           } else {
-            return reconcileStackRoutes(
-              state,
-              activeRoutes,
-              preloadedRoutes
-                .filter(
-                  (r) => r.name !== action.payload.name || id !== getId?.({ params: r.params })
-                )
-                .concat(createRouteFromAction({ action }))
-            );
+            return {
+              ...reconcileStackRoutes(
+                state,
+                activeRoutes,
+                preloadedRoutes
+                  .filter(
+                    (r) => r.name !== action.payload.name || id !== getId?.({ params: r.params })
+                  )
+                  .concat(createRouteFromAction({ action }))
+              ),
+              type: 'stack',
+            };
           }
         }
 

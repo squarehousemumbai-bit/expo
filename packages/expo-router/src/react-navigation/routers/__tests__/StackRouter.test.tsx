@@ -9,52 +9,9 @@ import {
   StackRouter,
   type StackNavigationState,
 } from '..';
+import { createInitialState } from '../../core/createInitialState';
 
 jest.mock('nanoid/non-secure', () => ({ nanoid: () => 'test' }));
-
-test('gets initial state from route names and params with initialRouteName', () => {
-  const router = StackRouter({ initialRouteName: 'baz' });
-
-  expect(
-    router.getInitialState({
-      routeNames: ['bar', 'baz', 'qux'],
-      routeParamList: {
-        baz: { answer: 42 },
-        qux: { name: 'Jane' },
-      },
-      routeGetIdList: {},
-    })
-  ).toEqual({
-    index: 0,
-    key: 'stack-test',
-    routeNames: ['bar', 'baz', 'qux'],
-    routes: [{ key: 'baz-test', name: 'baz', params: { answer: 42 } }],
-    stale: false,
-    type: 'stack',
-  });
-});
-
-test('gets initial state from route names and params without initialRouteName', () => {
-  const router = StackRouter({});
-
-  expect(
-    router.getInitialState({
-      routeNames: ['bar', 'baz', 'qux'],
-      routeParamList: {
-        baz: { answer: 42 },
-        qux: { name: 'Jane' },
-      },
-      routeGetIdList: {},
-    })
-  ).toEqual({
-    index: 0,
-    key: 'stack-test',
-    routeNames: ['bar', 'baz', 'qux'],
-    routes: [{ key: 'bar-test', name: 'bar' }],
-    stale: false,
-    type: 'stack',
-  });
-});
 
 test('gets rehydrated state from partial state', () => {
   const router = StackRouter({});
@@ -318,10 +275,9 @@ test('gets state on route names change with initialRouteName', () => {
 
 test('returns the same stack state when route names already match', () => {
   const router = StackRouter({});
-  const state = router.getInitialState({
+  const state = createInitialState<StackNavigationState<ParamListBase>>({
     routeNames: ['bar', 'baz'],
     routeParamList: {},
-    routeGetIdList: {},
   });
 
   expect(
@@ -373,7 +329,6 @@ test('handles navigate action', () => {
     router.getStateForAction(
       {
         stale: false,
-        type: 'stack',
         key: 'root',
         index: 1,
         routeNames: ['baz', 'bar', 'qux'],
@@ -387,7 +342,6 @@ test('handles navigate action', () => {
     )
   ).toEqual({
     stale: false,
-    type: 'stack',
     key: 'root',
     index: 2,
     routeNames: ['baz', 'bar', 'qux'],
@@ -2452,7 +2406,6 @@ test('adds route to preloaded list with preload', () => {
     router.getStateForAction(
       {
         stale: false,
-        type: 'stack',
         key: 'root',
         index: 2,
         routeNames: ['baz', 'bar', 'qux'],
@@ -3226,10 +3179,9 @@ test('getStateForDeclaredRoutes focuses the surviving top of the stack', () => {
 
 test('getStateForDeclaredRoutes returns the same state when every route is declared', () => {
   const router = StackRouter({});
-  const state = router.getInitialState({
+  const state = createInitialState<StackNavigationState<ParamListBase>>({
     routeNames: ['bar', 'baz'],
     routeParamList: {},
-    routeGetIdList: {},
   });
 
   expect(router.getStateForDeclaredRoutes(state, ['bar', 'baz'])).toBe(state);

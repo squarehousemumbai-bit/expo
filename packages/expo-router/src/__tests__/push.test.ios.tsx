@@ -102,7 +102,6 @@ it('stacks should always push a new route', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                   {
@@ -131,7 +130,6 @@ it('stacks should always push a new route', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                   {
@@ -160,7 +158,6 @@ it('stacks should always push a new route', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                   {
@@ -197,12 +194,10 @@ it('stacks should always push a new route', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
           ],
@@ -393,12 +388,10 @@ it('works in a nested layout Stack->Tab->Stack', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                 ],
                 stale: false,
-                type: 'tab',
               },
             },
             {
@@ -530,12 +523,10 @@ it('targets the correct Stack when pushing to a nested layout', () => {
                         },
                       ],
                       stale: false,
-                      type: 'stack',
                     },
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
             {
@@ -627,7 +618,6 @@ it('push should also add anchor routes', () => {
                   {
                     key: expect.any(String),
                     name: 'apple',
-                    params: undefined,
                   },
                   {
                     key: expect.any(String),
@@ -637,7 +627,6 @@ it('push should also add anchor routes', () => {
                   },
                 ],
                 stale: false,
-                type: 'stack',
               },
             },
           ],

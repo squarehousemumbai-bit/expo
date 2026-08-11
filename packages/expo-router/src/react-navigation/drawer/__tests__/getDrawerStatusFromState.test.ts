@@ -1,11 +1,13 @@
-import { DrawerRouter } from '../../routers';
+import type { DrawerNavigationState, ParamListBase } from '../../routers';
 import { getDrawerStatusFromState } from '../utils/getDrawerStatusFromState';
 
-const state = DrawerRouter({}).getInitialState({
+const state: DrawerNavigationState<ParamListBase> = {
+  stale: false,
+  key: 'drawer',
+  index: 0,
   routeNames: ['index'],
-  routeParamList: {},
-  routeGetIdList: {},
-});
+  routes: [{ key: 'index', name: 'index' }],
+};
 
 it('uses closed by default when history has no drawer entry', () => {
   expect(getDrawerStatusFromState(state)).toBe('closed');

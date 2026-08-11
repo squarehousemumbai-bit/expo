@@ -164,14 +164,6 @@ export type Router<
   Action extends NavigationAction,
 > = RouterType<State> & {
   /**
-   * Initialize the navigation state.
-   *
-   * @param options.routeNames List of valid route names as defined in the screen components.
-   * @param options.routeParamList Object containing params for each route.
-   */
-  getInitialState(options: RouterConfigOptions): State;
-
-  /**
    * Rehydrate the full navigation state from a given partial state.
    *
    * @param partialState Navigation state to rehydrate from.
