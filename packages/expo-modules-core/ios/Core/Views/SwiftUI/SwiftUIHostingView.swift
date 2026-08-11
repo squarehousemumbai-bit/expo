@@ -193,6 +193,19 @@ extension ExpoSwiftUI {
     }
 
     /**
+     React Native turns the `blur` view command into `-resignFirstResponder`, which is how
+     `Keyboard.dismiss()` and a `ScrollView`'s tap-to-dismiss blur the focused input. The
+     responder is a field somewhere in the hosted content, not this view.
+     */
+    public override func resignFirstResponder() -> Bool {
+      (contentView as? any ExpoSwiftUI.FocusableView)?.forceResignFirstResponder()
+      props.children?.forEach {
+        ($0 as? any ExpoSwiftUI.FocusableViewContainer)?.resignFirstResponderInSubtree()
+      }
+      return super.resignFirstResponder()
+    }
+
+    /**
      Setups layout constraints of the hosting controller view to match the layout set by React.
      */
     private func setupHostingViewConstraints() {

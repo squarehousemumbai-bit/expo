@@ -15,7 +15,9 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.annotation.UiThread
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.size
 import androidx.lifecycle.LifecycleOwner
@@ -64,6 +66,9 @@ abstract class ExpoComposeView<T : ComposeProps>(
   // Retained so the composition can be disposed on unmount: its strategy is
   // pinned to the Activity lifecycle, so nothing disposes it on window detach.
   private var hostingComposeView: ComposeView? = null
+
+  // Compose focus lives in the composition, not in the Android view tree.
+  private var hostedFocusManager: FocusManager? = null
 
   private val globalEvent = ViewEvent<Pair<String, Map<String, Any?>>>(GLOBAL_EVENT_NAME, this, null)
 
@@ -252,6 +257,11 @@ abstract class ExpoComposeView<T : ComposeProps>(
         )
       }
       it.setContent {
+        val focusManager = LocalFocusManager.current
+        DisposableEffect(focusManager) {
+          hostedFocusManager = focusManager
+          onDispose { hostedFocusManager = null }
+        }
         with(ComposableScope()) {
           Content()
         }
@@ -328,6 +338,15 @@ abstract class ExpoComposeView<T : ComposeProps>(
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
     transitioningChildren.clear()
+  }
+
+  /**
+   * Where React Native's `blur` view command lands.
+   * Also clears the Compose focus manager's focus, which is not part of the Android view tree and so does not clear on `View.clearFocus()`.
+   */
+  override fun clearFocus() {
+    hostedFocusManager?.clearFocus()
+    super.clearFocus()
   }
 }
 

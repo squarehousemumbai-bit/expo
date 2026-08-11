@@ -1,6 +1,7 @@
 package expo.modules.kotlin.views
 
 import android.view.View
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.uimanager.ReactStylesDiffMap
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.StateWrapper
@@ -41,6 +42,16 @@ class SimpleViewManagerWrapper(
   override fun onAfterUpdateTransaction(view: View) {
     super.onAfterUpdateTransaction(view)
     viewWrapperDelegate.onViewDidUpdateProps(view)
+  }
+
+  override fun receiveCommand(view: View, commandId: String, args: ReadableArray?) {
+    // React Native's `blur` command, dispatched by `Keyboard.dismiss()` and by a
+    // `ScrollView` dismissing on a tap outside the focused input.
+    if (commandId == "blur") {
+      view.clearFocus()
+      return
+    }
+    super.receiveCommand(view, commandId, args)
   }
 
   override fun getNativeProps(): MutableMap<String, String> {

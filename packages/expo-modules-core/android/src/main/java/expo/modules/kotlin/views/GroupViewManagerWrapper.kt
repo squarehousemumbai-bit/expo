@@ -2,6 +2,7 @@ package expo.modules.kotlin.views
 
 import android.view.View
 import android.view.ViewGroup
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.uimanager.ReactStylesDiffMap
 import com.facebook.react.uimanager.StateWrapper
 import com.facebook.react.uimanager.ThemedReactContext
@@ -33,6 +34,16 @@ class GroupViewManagerWrapper(
   override fun onAfterUpdateTransaction(view: ViewGroup) {
     super.onAfterUpdateTransaction(view)
     viewWrapperDelegate.onViewDidUpdateProps(view)
+  }
+
+  override fun receiveCommand(view: ViewGroup, commandId: String, args: ReadableArray?) {
+    // React Native's `blur` command, dispatched by `Keyboard.dismiss()` and by a
+    // `ScrollView` dismissing on a tap outside the focused input.
+    if (commandId == "blur") {
+      view.clearFocus()
+      return
+    }
+    super.receiveCommand(view, commandId, args)
   }
 
   override fun updateState(
